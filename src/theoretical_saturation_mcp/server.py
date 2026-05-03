@@ -106,6 +106,61 @@ def update_paper(paper_id: str, status: str = None, title: str = None, add_opera
     return f"Success: No changes made to paper {paper_id}."
 
 @mcp.tool()
+def get_papers(status: str = None, filepath: str = PAPERS_FILE) -> list[dict]:
+    """Filters papers by status and returns a list of paper objects. If status is None, returns all papers."""
+    path = Path(filepath)
+    registry = read_json(path)
+    
+    if status:
+        return [{"id": pid, **paper} for pid, paper in registry.items() if paper.get("status") == status]
+    return [{"id": pid, **paper} for pid, paper in registry.items()]
+
+@mcp.tool()
+def get_actionable_papers(status: str, missing_operation: str, limit: int = 1, filepath: str = PAPERS_FILE) -> list[str]:
+    """Returns a list of paper IDs (up to limit) that have the given status and have NOT undergone the missing_operation."""
+    path = Path(filepath)
+    registry = read_json(path)
+    
+    actionable = []
+    for pid, paper in registry.items():
+        if paper.get("status") == status and missing_operation not in paper.get("operations", []):
+            actionable.append(pid)
+            if len(actionable) >= limit:
+                break
+                
+    return actionable
+
+@mcp.tool()
+def get_taxonomy_state(taxonomy_filepath: str = TAXONOMY_FILE) -> dict | list:
+    """Returns the entire contents of the taxonomy and metadata."""
+    return read_yaml(Path(taxonomy_filepath))
+
+@mcp.tool()
+def initialize_project(seed_paper_id: str, seed_paper_title: str, positivity_scope: str, negativity_scope: str, taxonomy_filepath: str = TAXONOMY_FILE, papers_filepath: str = PAPERS_FILE) -> str:
+    """Initializes the project with the seed paper and scope definitions, setting current_phase=1 and redundancy_counter=0."""
+    taxonomy = {
+        "metadata": {
+            "seed_paper_id": seed_paper_id,
+            "seed_paper_title": seed_paper_title,
+            "positivity_scope": positivity_scope,
+            "negativity_scope": negativity_scope,
+            "current_phase": 1,
+            "redundancy_counter": 0
+        }
+    }
+    write_yaml(Path(taxonomy_filepath), taxonomy)
+    
+    registry = {
+        seed_paper_id: {
+            "title": seed_paper_title,
+            "status": "in_scope",
+            "operations": []
+        }
+    }
+    write_json(Path(papers_filepath), registry)
+    return "Success: Project initialized."
+
+@mcp.tool()
 def add_taxonomy_concept(category: str, concept: str, taxonomy_filepath: str = TAXONOMY_FILE) -> str:
     """Adds a new mathematical concept, method, or constraint to the taxonomy."""
     path = Path(taxonomy_filepath)
@@ -140,7 +195,7 @@ def update_metadata_state(current_phase: int, redundancy_counter: int, taxonomy_
 
 
 @mcp.tool()
-def log_decision(paper_id: str, title: str, novelty: bool, decision: str, justification: str, log_filepath: str = LOG_FILE) -> str:
+def log_decision(paper_id: str, title: str, brought_novelty: bool, novelty_description: str, decision: str, discover_phase: str, log_filepath: str = LOG_FILE) -> str:
     """Logs the evaluation decision for a paper in the audit log."""
     path = Path(log_filepath)
     log = read_yaml(path)
@@ -150,9 +205,10 @@ def log_decision(paper_id: str, title: str, novelty: bool, decision: str, justif
     entry = {
         "paperId": paper_id,
         "title": title,
-        "brought_novelty": novelty,
+        "brought_novelty": brought_novelty,
+        "novelty_description": novelty_description,
         "decision": decision,
-        "justification": justification
+        "discover_phase": discover_phase
     }
     
     log.append(entry)

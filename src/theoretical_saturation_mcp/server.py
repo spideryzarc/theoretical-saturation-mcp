@@ -4,17 +4,17 @@ import yaml
 from pathlib import Path
 from mcp.server.fastmcp import FastMCP
 
-# Inicializa o servidor MCP
+# Initialize the MCP server
 mcp = FastMCP("Theoretical Saturation")
 
-# --- FUNÇÕES AUXILIARES DE LEITURA/ESCRITA ---
+# --- HELPER FUNCTIONS FOR READING/WRITING ---
 
 def validate_path(filepath: Path, valid_extensions: tuple[str, ...]):
-    """Valida a extensão do arquivo e verifica se não é um diretório."""
+    """Validates the file extension and checks that it's not a directory."""
     if filepath.is_dir():
-        raise ValueError(f"O caminho '{filepath}' aponta para um diretório, mas deve ser um arquivo.")
+        raise ValueError(f"The path '{filepath}' points to a directory, but it must be a file.")
     if filepath.suffix.lower() not in valid_extensions:
-        raise ValueError(f"Extensão inválida para '{filepath.name}'. Esperado: {valid_extensions}")
+        raise ValueError(f"Invalid extension for '{filepath.name}'. Expected: {valid_extensions}")
 
 def read_json(filepath: Path) -> dict:
     validate_path(filepath, ('.json',))
@@ -25,7 +25,7 @@ def read_json(filepath: Path) -> dict:
 
 def write_json(filepath: Path, data: dict):
     validate_path(filepath, ('.json',))
-    # Garante que o diretório pai existe
+    # Ensure the parent directory exists
     filepath.parent.mkdir(parents=True, exist_ok=True)
     with open(filepath, 'w', encoding='utf-8') as f:
         json.dump(data, f, indent=2, ensure_ascii=False)
@@ -39,16 +39,16 @@ def read_yaml(filepath: Path) -> dict | list:
 
 def write_yaml(filepath: Path, data: dict | list):
     validate_path(filepath, ('.yaml', '.yml'))
-    # Garante que o diretório pai existe
+    # Ensure the parent directory exists
     filepath.parent.mkdir(parents=True, exist_ok=True)
     with open(filepath, 'w', encoding='utf-8') as f:
         yaml.safe_dump(data, f, sort_keys=False, allow_unicode=True)
 
-# --- FERRAMENTAS MCP EXPOSTAS PARA O LLM ---
+# --- MCP TOOLS EXPOSED TO THE LLM ---
 
 @mcp.tool()
 def register_candidate_papers(paper_ids: list[str], registry_file: str = "theo-sat/papers.json") -> str:
-    """Registra novos IDs de artigos no banco de dados com status 'pending'."""
+    """Registers new paper IDs in the database with 'pending' status."""
     path = Path(registry_file)
     registry = read_json(path)
     added = 0
@@ -56,23 +56,23 @@ def register_candidate_papers(paper_ids: list[str], registry_file: str = "theo-s
     for pid in paper_ids:
         if pid not in registry:
             registry[pid] = {
-                "title": "Aguardando processamento",
+                "title": "Awaiting processing",
                 "status": "pending",
                 "operations_done": []
             }
             added += 1
             
     write_json(path, registry)
-    return f"Sucesso: {added} novos artigos registrados. {len(paper_ids) - added} já existiam."
+    return f"Success: {added} new papers registered. {len(paper_ids) - added} already existed."
 
 @mcp.tool()
 def update_paper_status(paper_id: str, status: str, title: str = None, new_operation: str = None, registry_file: str = "theo-sat/papers.json") -> str:
-    """Atualiza o status (in_scope/out_of_scope) e registra operações feitas em um artigo."""
+    """Updates the status (in_scope/out_of_scope) and logs operations performed on a paper."""
     path = Path(registry_file)
     registry = read_json(path)
     
     if paper_id not in registry:
-        return f"Erro: Artigo {paper_id} não encontrado no registro."
+        return f"Error: Paper {paper_id} not found in the registry."
         
     registry[paper_id]["status"] = status
     if title:
@@ -81,11 +81,11 @@ def update_paper_status(paper_id: str, status: str, title: str = None, new_opera
         registry[paper_id]["operations_done"].append(new_operation)
         
     write_json(path, registry)
-    return f"Sucesso: Artigo {paper_id} atualizado para status '{status}'."
+    return f"Success: Paper {paper_id} updated to status '{status}'."
 
 @mcp.tool()
 def add_taxonomy_concept(category: str, concept: str, taxonomy_file: str = "theo-sat/taxonomy.yaml") -> str:
-    """Adiciona um novo conceito matemático, método ou restrição à taxonomia."""
+    """Adds a new mathematical concept, method, or constraint to the taxonomy."""
     path = Path(taxonomy_file)
     taxonomy = read_yaml(path)
     
@@ -95,13 +95,13 @@ def add_taxonomy_concept(category: str, concept: str, taxonomy_file: str = "theo
     if isinstance(taxonomy[category], list) and concept not in taxonomy[category]:
         taxonomy[category].append(concept)
         write_yaml(path, taxonomy)
-        return f"Sucesso: '{concept}' adicionado à categoria '{category}'."
+        return f"Success: '{concept}' added to category '{category}'."
         
-    return f"Aviso: Conceito '{concept}' já existe ou categoria inválida."
+    return f"Warning: Concept '{concept}' already exists or invalid category."
 
 @mcp.tool()
 def log_audit_decision(paper_id: str, title: str, novelty: bool, decision: str, justification: str, audit_file: str = "theo-sat/audit_log.yaml") -> str:
-    """Registra a avaliação de um artigo no log de auditoria."""
+    """Logs the evaluation decision for a paper in the audit log."""
     path = Path(audit_file)
     log = read_yaml(path)
     if not isinstance(log, list):
@@ -117,11 +117,11 @@ def log_audit_decision(paper_id: str, title: str, novelty: bool, decision: str, 
     
     log.append(entry)
     write_yaml(path, log)
-    return f"Sucesso: Decisão sobre '{paper_id}' registrada no log."
+    return f"Success: Decision for '{paper_id}' recorded in the log."
 
 @mcp.tool()
 def update_metadata_state(current_phase: int, redundancy_counter: int, taxonomy_file: str = "theo-sat/taxonomy.yaml") -> str:
-    """Atualiza o controle de loop (Fase e Redundância) da IA na memória."""
+    """Updates the AI's loop control state (Phase and Redundancy) in memory."""
     path = Path(taxonomy_file)
     taxonomy = read_yaml(path)
     
@@ -132,4 +132,4 @@ def update_metadata_state(current_phase: int, redundancy_counter: int, taxonomy_
     taxonomy["metadata"]["redundancy_counter"] = redundancy_counter
     
     write_yaml(path, taxonomy)
-    return f"Sucesso: Estado atualizado -> Fase {current_phase}, Redundância {redundancy_counter}/5."
+    return f"Success: State updated -> Phase {current_phase}, Redundancy {redundancy_counter}/5."

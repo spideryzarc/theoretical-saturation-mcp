@@ -1,23 +1,23 @@
 # Theoretical Saturation MCP
 
-Um servidor MCP (Model Context Protocol) escrito em Python, focado em gerenciar a saturação teórica para o seu processo de revisão bibliográfica. 
+An MCP (Model Context Protocol) server written in Python, focused on managing the theoretical saturation state for your systematic literature reviews.
 
-Este projeto foi estruturado com as melhores práticas para ser facilmente executável via `uvx`, permitindo que seja usado como uma ferramenta independente e de fácil integração.
+This project is structured with best practices to be easily executable via `uvx`, allowing it to be used as a standalone, zero-installation tool.
 
-## 🚀 Como usar com `uvx`
+## 🚀 Usage with `uvx`
 
-A estrutura de pacote do Python deste projeto permite que o servidor seja baixado, instalado e executado diretamente via GitHub usando a ferramenta `uv` (especificamente o comando `uvx`). 
+The Python package structure of this project allows the server to be fetched, installed, and executed directly via GitHub using the `uv` CLI (specifically the `uvx` command).
 
-Para rodá-lo, você pode usar um dos comandos abaixo em qualquer terminal (não requer clonagem do repositório):
+To run it from anywhere in your terminal without cloning the repository, use:
 
 ```bash
-# Se o repositório for público (substitua 'seu-usuario' pelo seu username do GitHub)
-uvx --from git+https://github.com/seu-usuario/theoretical-saturation-mcp theoretical-saturation-mcp
+# If the repository is public (replace 'your-username' with your GitHub username)
+uvx --from git+https://github.com/your-username/theoretical-saturation-mcp theoretical-saturation-mcp
 ```
 
-### 🔌 Integração com o Claude Desktop
+### 🔌 Claude Desktop Integration
 
-Você pode configurar este MCP no seu arquivo `claude_desktop_config.json` para que o Claude o carregue automaticamente sem que você precise instalar dependências de forma global:
+Add the following configuration to your `claude_desktop_config.json` to load the MCP automatically:
 
 ```json
 {
@@ -26,7 +26,7 @@ Você pode configurar este MCP no seu arquivo `claude_desktop_config.json` para 
       "command": "uvx",
       "args": [
         "--from",
-        "git+https://github.com/seu-usuario/theoretical-saturation-mcp",
+        "git+https://github.com/your-username/theoretical-saturation-mcp",
         "theoretical-saturation-mcp"
       ]
     }
@@ -34,29 +34,29 @@ Você pode configurar este MCP no seu arquivo `claude_desktop_config.json` para 
 }
 ```
 
-## 🛠️ Desenvolvimento Local
+## 🛠️ Local Development
 
-Caso você queira editar e testar o código do MCP, siga os passos abaixo:
+To modify and test the code locally:
 
-1. **Instale o `uv`** (se ainda não o tiver)
+1. **Install `uv`** (if you haven't already):
    ```bash
    curl -LsSf https://astral.sh/uv/install.sh | sh
    ```
 
-2. **Clone este repositório** e entre na pasta:
+2. **Clone this repository** and enter its directory:
    ```bash
-   git clone https://github.com/seu-usuario/theoretical-saturation-mcp.git
+   git clone https://github.com/your-username/theoretical-saturation-mcp.git
    cd theoretical-saturation-mcp
    ```
 
-3. **Rode o servidor localmente**:
-   O comando `uv run` cuidará automaticamente de criar um ambiente virtual (se necessário) e baixar as dependências.
+3. **Run the server locally**:
+   The `uv run` command automatically prepares a virtual environment and downloads dependencies for you.
    ```bash
    uv run theoretical-saturation-mcp
    ```
 
-## 📁 Estrutura do Projeto
+## 📁 Project Structure
 
-* `pyproject.toml`: Configuração do pacote e dependências. Define também o comando `[project.scripts]` que possibilita rodar o MCP pelo nome via terminal ou `uvx`.
-* `src/theoretical_saturation_mcp/main.py`: O "entry point" configurado que chama e inicia o MCP.
-* `src/theoretical_saturation_mcp/server.py`: Onde as ferramentas (tools), recursos e a lógica do `FastMCP` estão implementados.
+* `pyproject.toml`: Package configuration, project metadata, and dependencies. Defines the `[project.scripts]` entrypoint used by `uvx`.
+* `src/theoretical_saturation_mcp/main.py`: Entrypoint module that starts the MCP server.
+* `src/theoretical_saturation_mcp/server.py`: Source code where the tools, resources, and FastMCP instance reside.

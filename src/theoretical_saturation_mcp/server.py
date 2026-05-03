@@ -52,9 +52,9 @@ def write_yaml(filepath: Path, data: dict | list):
 # --- MCP TOOLS EXPOSED TO THE LLM ---
 
 @mcp.tool()
-def add_papers(papers: dict[str, str], filepath: str = PAPERS_FILE) -> str:
+def add_papers(papers: dict[str, str]) -> str:
     """Registers new paper IDs and titles in the database with 'pending' status. Returns the number of new papers registered and the number of papers that already existed. """
-    path = Path(filepath)
+    path = Path(PAPERS_FILE)
     registry = read_json(path)
     added = 0
     
@@ -72,9 +72,9 @@ def add_papers(papers: dict[str, str], filepath: str = PAPERS_FILE) -> str:
     return f"Success: {added} new papers registered. {len(papers) - added} already existed."
 
 @mcp.tool()
-def update_paper(paper_id: str, status: str = None, title: str = None, add_operation: str = None, remove_operation: str = None, filepath: str = PAPERS_FILE) -> str:
+def update_paper(paper_id: str, status: str = None, title: str = None, add_operation: str = None, remove_operation: str = None) -> str:
     """Updates paper attributes. Supports status in [in_scope, out_of_scope, pending], title, add/remove operations. Returns success message or error message if paper not found"""
-    path = Path(filepath)
+    path = Path(PAPERS_FILE)
     registry = read_json(path)
     
     if paper_id not in registry:
@@ -106,9 +106,9 @@ def update_paper(paper_id: str, status: str = None, title: str = None, add_opera
     return f"Success: No changes made to paper {paper_id}."
 
 @mcp.tool()
-def get_papers(status: str = None, filepath: str = PAPERS_FILE) -> list[dict]:
+def get_papers(status: str = None) -> list[dict]:
     """Filters papers by status and returns a list of paper objects. If status is None, returns all papers."""
-    path = Path(filepath)
+    path = Path(PAPERS_FILE)
     registry = read_json(path)
     
     if status:
@@ -116,9 +116,9 @@ def get_papers(status: str = None, filepath: str = PAPERS_FILE) -> list[dict]:
     return [{"id": pid, **paper} for pid, paper in registry.items()]
 
 @mcp.tool()
-def get_actionable_papers(status: str, missing_operation: str, limit: int = 1, filepath: str = PAPERS_FILE) -> list[str]:
+def get_actionable_papers(status: str, missing_operation: str, limit: int = 1) -> list[str]:
     """Returns a list of paper IDs (up to limit) that have the given status and have NOT undergone the missing_operation."""
-    path = Path(filepath)
+    path = Path(PAPERS_FILE)
     registry = read_json(path)
     
     actionable = []
@@ -131,12 +131,12 @@ def get_actionable_papers(status: str, missing_operation: str, limit: int = 1, f
     return actionable
 
 @mcp.tool()
-def get_taxonomy_state(taxonomy_filepath: str = TAXONOMY_FILE) -> dict | list:
+def get_taxonomy_state() -> dict | list:
     """Returns the entire contents of the taxonomy and metadata."""
-    return read_yaml(Path(taxonomy_filepath))
+    return read_yaml(Path(TAXONOMY_FILE))
 
 @mcp.tool()
-def initialize_project(seed_paper_id: str, seed_paper_title: str, positivity_scope: str, negativity_scope: str, taxonomy_filepath: str = TAXONOMY_FILE, papers_filepath: str = PAPERS_FILE) -> str:
+def initialize_project(seed_paper_id: str, seed_paper_title: str, positivity_scope: str, negativity_scope: str) -> str:
     """Initializes the project with the seed paper and scope definitions, setting current_phase=1 and redundancy_counter=0."""
     taxonomy = {
         "metadata": {
@@ -148,7 +148,7 @@ def initialize_project(seed_paper_id: str, seed_paper_title: str, positivity_sco
             "redundancy_counter": 0
         }
     }
-    write_yaml(Path(taxonomy_filepath), taxonomy)
+    write_yaml(Path(TAXONOMY_FILE), taxonomy)
     
     registry = {
         seed_paper_id: {
@@ -157,13 +157,13 @@ def initialize_project(seed_paper_id: str, seed_paper_title: str, positivity_sco
             "operations": []
         }
     }
-    write_json(Path(papers_filepath), registry)
+    write_json(Path(PAPERS_FILE), registry)
     return "Success: Project initialized."
 
 @mcp.tool()
-def add_taxonomy_concept(category: str, concept: str, taxonomy_filepath: str = TAXONOMY_FILE) -> str:
+def add_taxonomy_concept(category: str, concept: str) -> str:
     """Adds a new mathematical concept, method, or constraint to the taxonomy."""
-    path = Path(taxonomy_filepath)
+    path = Path(TAXONOMY_FILE)
     taxonomy = read_yaml(path)
     
     if category not in taxonomy:
@@ -178,9 +178,9 @@ def add_taxonomy_concept(category: str, concept: str, taxonomy_filepath: str = T
 
 
 @mcp.tool()
-def update_metadata_state(current_phase: int, redundancy_counter: int, taxonomy_filepath: str = TAXONOMY_FILE) -> str:
+def update_metadata_state(current_phase: int, redundancy_counter: int) -> str:
     """Updates the AI's loop control state (Phase and Redundancy) in memory."""
-    path = Path(taxonomy_filepath)
+    path = Path(TAXONOMY_FILE)
     taxonomy = read_yaml(path)
     
     if "metadata" not in taxonomy:
@@ -195,9 +195,9 @@ def update_metadata_state(current_phase: int, redundancy_counter: int, taxonomy_
 
 
 @mcp.tool()
-def log_decision(paper_id: str, title: str, brought_novelty: bool, novelty_description: str, decision: str, discover_phase: str, log_filepath: str = LOG_FILE) -> str:
+def log_decision(paper_id: str, title: str, brought_novelty: bool, novelty_description: str, decision: str, discover_phase: str) -> str:
     """Logs the evaluation decision for a paper in the audit log."""
-    path = Path(log_filepath)
+    path = Path(LOG_FILE)
     log = read_yaml(path)
     if not isinstance(log, list):
         log = []

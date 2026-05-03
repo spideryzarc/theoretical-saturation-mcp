@@ -16,3 +16,6 @@ theoretical-saturation-mcp = "theoretical_saturation_mcp.main:main"
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
+
+[dependency-groups]
+dev = ["pytest>=8.0.0"]

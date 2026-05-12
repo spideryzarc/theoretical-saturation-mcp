@@ -51,6 +51,30 @@ def write_yaml(filepath: Path, data: dict | list):
 
 # --- MCP TOOLS EXPOSED TO THE LLM ---
 
+@mcp.resource("context://theoretical-saturation/manifesto")
+def theoretical_saturation_manifesto() -> str:
+    """Provides an English guide to help MCP clients use this server effectively."""
+    return """Theoretical Saturation MCP - Core Methodology and Usage Guide
+
+Why this server exists: Context Offloading & Methodology Enforcement
+This server manages the state of a Systematic Literature Review (SLR) via local files so you (the LLM) do not have to hold massive lists of papers and taxonomies in your context window. It provides granular tools to enforce a rigid theoretical saturation methodology, acting as your persistent memory and workflow manager.
+
+Core Methodology (The Evaluation Loop):
+1. State Check: Understand boundaries via `get_taxonomy_state`.
+2. Fetch Work: Retrieve only what you need next via `get_actionable_papers` to save context.
+3. Evaluate Novelty: Compare a paper against the known taxonomy.
+4. Commit State: 
+   - Found novelty? Use `add_taxonomy_concept`.
+   - Update the paper's status and operations via `update_paper`.
+   - Log the justification via `log_decision`.
+5. Track Saturation: If a paper yielded no new concepts, increment redundancy via `update_metadata_state`.
+
+LLM Client Directives:
+- Granularity: Process papers in small batches. Never load the entire state into memory unless required.
+- Determinism: Write your decisions immediately using the provided tools.
+- Saturation Limit: The review converges and finishes when the redundancy counter reaches its limit (e.g., no novelty across X consecutive papers).
+"""
+
 @mcp.tool()
 def add_papers(papers: dict[str, str]) -> str:
     """Registers new paper IDs and titles in the database with 'pending' status. Returns the number of new papers registered and the number of papers that already existed. """

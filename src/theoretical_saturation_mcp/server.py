@@ -186,7 +186,7 @@ def initialize_project(seed_paper_id: str, seed_paper_title: str, positivity_sco
 
 @mcp.tool()
 def add_taxonomy_concept(category: str, concept: str) -> str:
-    """Adds a new mathematical concept, method, or constraint to the taxonomy."""
+    """Adds a new taxonomy concept to a category in the taxonomy."""
     path = Path(TAXONOMY_FILE)
     taxonomy = read_yaml(path)
     
@@ -199,6 +199,63 @@ def add_taxonomy_concept(category: str, concept: str) -> str:
         return f"Success: '{concept}' added to category '{category}'."
         
     return f"Warning: Concept '{concept}' already exists or invalid category."
+
+@mcp.tool()
+def remove_taxonomy_concept(category: str, concept: str) -> str:
+    """Removes an existing concept from a specific category in the taxonomy. Useful for correcting prior extractions."""
+    path = Path(TAXONOMY_FILE)
+    taxonomy = read_yaml(path)
+    
+    if category in taxonomy and isinstance(taxonomy[category], list):
+        if concept in taxonomy[category]:
+            taxonomy[category].remove(concept)
+            write_yaml(path, taxonomy)
+            return f"Success: '{concept}' removed from category '{category}'."
+        return f"Warning: Concept '{concept}' not found in category '{category}'."
+    return f"Error: Category '{category}' not found or is not a list."
+
+@mcp.tool()
+def update_taxonomy_concept(category: str, old_concept: str, new_concept: str) -> str:
+    """Updates/renames an existing concept within a category. Useful for standardizing extracted terminology."""
+    path = Path(TAXONOMY_FILE)
+    taxonomy = read_yaml(path)
+    
+    if category in taxonomy and isinstance(taxonomy[category], list):
+        if old_concept in taxonomy[category]:
+            idx = taxonomy[category].index(old_concept)
+            taxonomy[category][idx] = new_concept
+            write_yaml(path, taxonomy)
+            return f"Success: '{old_concept}' updated to '{new_concept}' in category '{category}'."
+        return f"Warning: Concept '{old_concept}' not found in category '{category}'."
+    return f"Error: Category '{category}' not found or is not a list."
+
+@mcp.tool()
+def remove_taxonomy_category(category: str) -> str:
+    """Completely removes an entire category and all its concepts from the taxonomy. Use with caution."""
+    if category == "metadata":
+        return "Error: Cannot remove the 'metadata' category."
+        
+    path = Path(TAXONOMY_FILE)
+    taxonomy = read_yaml(path)
+    
+    if category in taxonomy:
+        del taxonomy[category]
+        write_yaml(path, taxonomy)
+        return f"Success: Category '{category}' removed."
+    return f"Warning: Category '{category}' not found."
+
+@mcp.tool()
+def get_taxonomy_concepts(category: str = None) -> dict | list:
+    """Lists concepts from a specific category. If category is omitted, returns all categories and their concepts (excluding metadata)."""
+    taxonomy = read_yaml(Path(TAXONOMY_FILE))
+    
+    if category:
+        if category in taxonomy and isinstance(taxonomy[category], list):
+            return taxonomy[category]
+        return []
+    
+    # Return all non-metadata keys
+    return {k: v for k, v in taxonomy.items() if k != "metadata"}
 
 
 @mcp.tool()

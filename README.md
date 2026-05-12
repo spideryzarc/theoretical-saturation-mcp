@@ -6,13 +6,17 @@ This project is structured with best practices to be easily executable via `uvx`
 
 ## ⚙️ Features
 
-The server provides a robust set of tools specifically designed to handle the state management of an Autonomous Theoretical Saturation Agent:
+The server provides a robust set of tools and resources specifically designed to handle the state management of an Autonomous Theoretical Saturation Agent:
 
+- **Methodology Enforcement**: Exposes a `context://theoretical-saturation/manifesto` resource that guides the LLM through the strict theoretical saturation evaluation loop.
 - **State Initialization**: `initialize_project` creates the initial taxonomy and papers registry.
-- **State Queries**: `get_taxonomy_state` retrieves current scope and phase data, while `get_papers` returns the full or filtered registry.
+- **State Queries**: `get_taxonomy_state` retrieves current scope and phase data, `get_taxonomy_concepts` lists concepts efficiently while hiding metadata, and `get_papers` returns the full or filtered registry.
 - **Anti-Looping Filtering**: `get_actionable_papers` selects papers that have not yet undergone specific recursive operations.
 - **Data Enrichment**: `add_papers` registers new discoveries as pending, and `update_paper` flags operations performed.
-- **Taxonomy Evolution**: `add_taxonomy_concept` registers novel concepts discovered during analysis.
+- **Taxonomy Evolution & Curation**: 
+  - `add_taxonomy_concept` registers novel concepts discovered during analysis.
+  - `update_taxonomy_concept` standardizes and renames extracted terminology.
+  - `remove_taxonomy_concept` and `remove_taxonomy_category` prune findings that are retrospectively deemed irrelevant.
 - **Loop Control**: `update_metadata_state` handles phase transitions and redundancy limits.
 - **Audit Logging**: `log_decision` records each novelty evaluation decision directly into the activity history.
 

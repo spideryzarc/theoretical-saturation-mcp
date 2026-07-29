@@ -5,8 +5,8 @@ description = "MCP Server para gerenciar a saturação teórica."
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
-    "mcp>=1.0.0",
     "fastmcp>=0.1.0",
+    "uvicorn>=0.20.0",
     "PyYAML>=6.0.2",
 ]
 

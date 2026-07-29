@@ -2,7 +2,7 @@ import os
 import json
 import yaml
 from pathlib import Path
-from mcp.server.fastmcp import FastMCP
+from fastmcp import FastMCP
 
 # Initialize the MCP server
 mcp = FastMCP("Theoretical Saturation")
